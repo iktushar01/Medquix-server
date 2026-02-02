@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    // Output folder for compiled JS
+    "outDir": "./dist",
+
+    // Module system & resolution
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ES2023",
+
+    // Strict type checking
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+
+    // Source maps and declarations
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // Modules & interop
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "moduleDetection": "force",
+    "noUncheckedSideEffectImports": true,
+  },
+  "include": [
+    "src/**/*",
+    "src/generated/prisma/**/*" // Include Prisma client in TS compilation
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

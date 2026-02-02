@@ -1,0 +1,128 @@
+# ============================================
+# Dependencies
+# ============================================
+node_modules/
+package-lock.json
+
+# ============================================
+# Environment Variables
+# ============================================
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env*.local
+
+# ============================================
+# Build Outputs
+# ============================================
+dist/
+build/
+*.tsbuildinfo
+
+# ============================================
+# TypeScript
+# ============================================
+*.js.map
+*.d.ts.map
+
+# ============================================
+# Prisma
+# ============================================
+# Generated Prisma Client (custom output location)
+src/generated/prisma/
+/generated/prisma/
+
+# Prisma migration lock file (optional - keep if you want to track it)
+# prisma/migrations/migration_lock.toml
+
+# ============================================
+# Logs
+# ============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================
+# OS Files
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================
+# IDE & Editor Files
+# ============================================
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains IDEs (WebStorm, IntelliJ, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# ============================================
+# Testing & Coverage
+# ============================================
+coverage/
+*.lcov
+.nyc_output/
+.jest/
+
+# ============================================
+# Temporary Files
+# ============================================
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.cache
+
+# ============================================
+# Miscellaneous
+# ============================================
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vercel
+.serverless/

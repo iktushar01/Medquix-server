@@ -1,10 +1,12 @@
-generator client {
-  provider = "prisma-client-js"
-}
 
 datasource db {
   provider = "postgresql"
 }
+
+generator client {
+  provider = "prisma-client-js"
+}
+
 
 // ============================================
 // ENUMS
@@ -25,17 +27,18 @@ enum OrderStatus {
 // ==========================
 // Categories
 // ==========================
-model Category {
-  id          Int       @id @default(autoincrement())
-  name        String    @db.VarChar(255)
-  description String?   @db.Text
-  parentId    Int?      
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  isActive    Boolean   @default(true)
 
-  parent   Category?   @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children Category[]  @relation("CategoryHierarchy")
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  parentId    Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children Category[] @relation("CategoryHierarchy")
 
   medicines Medicine[]
 
@@ -47,6 +50,7 @@ model Category {
 // ==========================
 // Medicines
 // ==========================
+
 model Medicine {
   id           Int       @id @default(autoincrement())
   name         String    @db.VarChar(255)
@@ -77,17 +81,18 @@ model Medicine {
 // ==========================
 // Orders
 // ==========================
+
 model Order {
-  id               Int         @id @default(autoincrement())
-  customerId       String      @db.VarChar(255) // from Beter Auth
-  totalAmount      Decimal     @db.Decimal(10, 2)
-  status           OrderStatus @default(PLACED)
-  shippingAddress  String      @db.VarChar(500)
-  billingAddress   String?     @db.VarChar(500)
-  paymentMethod    String?     @db.VarChar(50)  // Cash on Delivery
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-  isActive         Boolean     @default(true)
+  id              Int         @id @default(autoincrement())
+  customerId      String      @db.VarChar(255) // from Beter Auth
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  status          OrderStatus @default(PLACED)
+  shippingAddress String      @db.VarChar(500)
+  billingAddress  String?     @db.VarChar(500)
+  paymentMethod   String?     @db.VarChar(50) // Cash on Delivery
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  isActive        Boolean     @default(true)
 
   orderItems OrderItem[]
 
@@ -100,6 +105,7 @@ model Order {
 // ==========================
 // Order Items
 // ==========================
+
 model OrderItem {
   id         Int      @id @default(autoincrement())
   orderId    Int
@@ -120,6 +126,7 @@ model OrderItem {
 // ==========================
 // Cart Items
 // ==========================
+
 model CartItem {
   id         Int      @id @default(autoincrement())
   customerId String   @db.VarChar(255) // from Beter Auth
@@ -139,6 +146,7 @@ model CartItem {
 // ==========================
 // Reviews
 // ==========================
+
 model Review {
   id         Int      @id @default(autoincrement())
   customerId String   @db.VarChar(255) // from Beter Auth
@@ -156,4 +164,67 @@ model Review {
   @@index([rating])
   @@index([createdAt])
   @@map("reviews")
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }

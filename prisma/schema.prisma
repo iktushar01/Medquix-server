@@ -7,7 +7,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 // ============================================
 // ENUMS
 // ============================================
@@ -176,6 +175,10 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+
+  role   String? @default("user")
+  phone  String?
+  status String? @default("ACTIVE")
 
   @@unique([email])
   @@map("user")

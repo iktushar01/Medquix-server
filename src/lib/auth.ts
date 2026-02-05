@@ -43,6 +43,8 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendOnSignUp: true,
+    autoSignIn: false,
+    autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url, token }, request) => {
       const siteName = 'MedQuix';
       const primaryColor = '#0f172a'; // Deep Indigo
@@ -116,4 +118,13 @@ export const auth = betterAuth({
       }
     }
   },
+  baseURL: process.env.BETTER_AUTH_URL,
+  socialProviders: {
+        google: { 
+            prompt: "select_account consent",
+            accessType: "offline",
+            clientId: process.env.GOOGLE_CLIENT_ID as string, 
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
+        }, 
+    },
 });

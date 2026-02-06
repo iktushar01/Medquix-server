@@ -43,8 +43,10 @@ model Category {
 
   @@index([name])
   @@index([parentId])
+  @@unique([name, parentId])
   @@map("categories")
 }
+
 
 // ==========================
 // Medicines

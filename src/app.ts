@@ -2,6 +2,7 @@ import express, { Application } from "express"
 import cors from "cors"
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
+import categoryRoutes from "./modules/categories/categories.router.js";
 
 const app: Application = express();
 
@@ -21,5 +22,7 @@ app.get("/", (req, res) => {
     message: "MedQuix Server is Running"
   })
 })
+
+app.use("/api/categories", categoryRoutes);
 
 export { app }

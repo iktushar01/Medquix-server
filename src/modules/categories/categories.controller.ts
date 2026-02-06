@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-import { createCategoryService, getCategoriesService } from "./categories.services.js";
-import { prisma } from "../../lib/prisma.js";
+import { createCategoryService, getCategoriesService, updateCategoryService  } from "./categories.services.js";
 
 export const createCategory = async (req: Request, res: Response) => {
   try {
@@ -50,6 +49,42 @@ export const getCategories = async (_req: Request, res: Response) => {
       data: categories
     });
   } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong"
+    });
+  }
+};
+
+
+export const updateCategory = async (req: Request, res: Response) => {
+  try {
+    const categoryId = Number(req.params.id);
+    if (isNaN(categoryId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid category ID"
+      });
+    }
+
+    const payload = req.body; // { name?, description?, parentId?, isActive? }
+
+    const updatedCategory = await updateCategoryService(categoryId, payload);
+
+    res.json({
+      success: true,
+      message: "Category updated successfully",
+      data: updatedCategory
+    });
+
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      return res.status(409).json({
+        success: false,
+        message: "Category name already exists under this parent"
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: error.message || "Something went wrong"

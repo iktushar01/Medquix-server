@@ -78,12 +78,23 @@ export const updateCategoryService = async (id: number, payload: UpdateCategoryP
 
 export const deleteCategoryService = async (id: number) => {
   // check if category exists
-  const category = await prisma.category.findUnique({ where: { id } });
+  const category = await prisma.category.findUnique({
+    where: { id },
+    include: { medicines: true } // check linked medicines
+  });
+
   if (!category) {
     throw new Error("Category not found");
   }
 
-  // soft delete: just set isActive = false
+  // safeguard: prevent deleting if it has medicines
+  if (category.medicines.length > 0) {
+    throw new Error(
+      "Cannot delete category: it has medicines. Remove medicines first."
+    );
+  }
+
+  // soft delete
   const deleted = await prisma.category.update({
     where: { id },
     data: { isActive: false }

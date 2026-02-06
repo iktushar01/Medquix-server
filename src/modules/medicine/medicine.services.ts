@@ -112,3 +112,32 @@ export const updateSellerMedicineInDB = async (
 
   return updatedMedicine;
 };
+
+
+export const deleteSellerMedicineFromDB = async (
+  medicineId: number,
+  sellerId: string
+) => {
+  // 1️⃣ Ownership check
+  const medicine = await prisma.medicine.findFirst({
+    where: {
+      id: medicineId,
+      sellerId,
+      isActive: true,
+    },
+  });
+
+  if (!medicine) {
+    throw new Error("Medicine not found or unauthorized");
+  }
+
+  // 2️⃣ Soft delete
+  const deletedMedicine = await prisma.medicine.update({
+    where: { id: medicineId },
+    data: {
+      isActive: false,
+    },
+  });
+
+  return deletedMedicine;
+};

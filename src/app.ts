@@ -12,7 +12,7 @@ app.use(cors({
   credentials: true,
 }))
 
-app.all("/api/auth/*spliat", toNodeHandler(auth));
+app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use(cors())
 app.use(express.json())

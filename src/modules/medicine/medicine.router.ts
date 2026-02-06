@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createMedicine,
+  deleteSellerMedicine,
   getAllMedicines,
   getMedicineById,
   getSellerMedicines,
@@ -15,6 +16,8 @@ const sellerRouter = Router();
 sellerRouter.get("/", auth(UserRole.SELLER), getSellerMedicines);
 sellerRouter.post("/", auth(UserRole.SELLER), createMedicine);
 sellerRouter.patch("/:id", auth(UserRole.SELLER), updateSellerMedicine);
+sellerRouter.delete("/:id", auth(UserRole.SELLER), deleteSellerMedicine);
+
 
 // Public medicine routes (mounted at /api/medicines)
 router.get("/", getAllMedicines);

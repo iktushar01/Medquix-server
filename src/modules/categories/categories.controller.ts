@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createCategoryService, getCategoriesService, updateCategoryService  } from "./categories.services.js";
+import { createCategoryService, getCategoriesService, updateCategoryService,deleteCategoryService } from "./categories.services.js";
 
 export const createCategory = async (req: Request, res: Response) => {
   try {
@@ -85,6 +85,32 @@ export const updateCategory = async (req: Request, res: Response) => {
       });
     }
 
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong"
+    });
+  }
+};
+
+
+export const deleteCategory = async (req: Request, res: Response) => {
+  try {
+    const categoryId = Number(req.params.id);
+    if (isNaN(categoryId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid category ID"
+      });
+    }
+
+    const deletedCategory = await deleteCategoryService(categoryId);
+
+    res.json({
+      success: true,
+      message: "Category deleted successfully",
+      data: deletedCategory
+    });
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       message: error.message || "Something went wrong"

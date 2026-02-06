@@ -74,3 +74,20 @@ export const updateCategoryService = async (id: number, payload: UpdateCategoryP
 
   return updated;
 };
+
+
+export const deleteCategoryService = async (id: number) => {
+  // check if category exists
+  const category = await prisma.category.findUnique({ where: { id } });
+  if (!category) {
+    throw new Error("Category not found");
+  }
+
+  // soft delete: just set isActive = false
+  const deleted = await prisma.category.update({
+    where: { id },
+    data: { isActive: false }
+  });
+
+  return deleted;
+};

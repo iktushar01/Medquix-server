@@ -1,16 +1,15 @@
 import { Router } from "express";
-import { createCategory, getCategories, updateCategory } from "./categories.controller.js";
+import { createCategory, deleteCategory, getCategories, updateCategory } from "./categories.controller.js";
 import auth, { UserRole } from "../../middlewares/auth.js";
 
 const router = Router();
 
-// POST → admin only
+// ADMIN-only
 router.post("/", auth(UserRole.ADMIN), createCategory);
-
-// PATCH → admin only
 router.patch("/:id", auth(UserRole.ADMIN), updateCategory);
+router.delete("/:id", auth(UserRole.ADMIN), deleteCategory);
 
-// GET routes → public
+// Public GET
 router.get("/", getCategories);
 
 export default router;

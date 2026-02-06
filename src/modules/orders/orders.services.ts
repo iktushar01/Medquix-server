@@ -87,3 +87,36 @@ export const getMyOrders = async (userId: string) => {
     },
   });
 };
+
+export const getOrderDetails = async (
+  userId: string,
+  orderId: number
+) => {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      orderItems: {
+        include: {
+          medicine: {
+            select: {
+              id: true,
+              name: true,
+              manufacturer: true,
+              price: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  if (order.customerId !== userId) {
+    throw new Error("Access denied");
+  }
+
+  return order;
+};

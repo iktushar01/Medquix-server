@@ -64,7 +64,7 @@ export const getMedicineByIdService = async (id: number) => {
 };
 
 
- export const getSellerMedicinesFromDB = async (sellerId: string) => {
+export const getSellerMedicinesFromDB = async (sellerId: string) => {
   const medicines = await prisma.medicine.findMany({
     where: {
       sellerId,
@@ -141,3 +141,27 @@ export const deleteSellerMedicineFromDB = async (
 
   return deletedMedicine;
 };
+//   const medicine = await prisma.medicine.findFirst({
+//     where: {
+//       id,
+//       isActive: true,
+//     },
+//     include: {
+//       category: true,
+//       reviews: {
+//         where: { isActive: true },
+//         select: {
+//           id: true,
+//           rating: true,
+//           comment: true,
+//           customerId: true,
+//           createdAt: true
+//         }
+//       }
+//     },
+//   });
+
+//   if (!medicine) throw new Error("Medicine not found");
+
+//   return medicine;
+// };

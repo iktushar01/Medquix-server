@@ -159,6 +159,7 @@ model Review {
   isActive   Boolean  @default(true)
 
   medicine Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@unique([customerId, medicineId])
   @@index([medicineId])
@@ -177,6 +178,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  reviews       Review[]
 
   role   String? @default("user")
   phone  String?

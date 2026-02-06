@@ -3,7 +3,7 @@ import cors from "cors"
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
 import categoryRoutes from "./modules/categories/categories.router.js";
-import medicineRoutes from "./modules/medicine/medicine.router.js";
+import medicineRoutes, { sellerRouter } from "./modules/medicine/medicine.router.js";
 
 const app: Application = express();
 
@@ -25,5 +25,6 @@ app.get("/", (req, res) => {
 })
 
 app.use("/api/categories", categoryRoutes);
-app.use("/api/seller/medicines", medicineRoutes);
+app.use("/api/medicines", medicineRoutes);
+app.use("/api/seller/medicines", sellerRouter);
 export { app }

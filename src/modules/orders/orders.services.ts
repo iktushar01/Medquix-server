@@ -120,3 +120,31 @@ export const getOrderDetails = async (
 
   return order;
 };
+
+
+export const cancelOrder = async (userId: string, orderId: number) => {
+  // Find order
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+  });
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  // Check ownership
+  if (order.customerId !== userId) {
+    throw new Error("Access denied");
+  }
+
+  // Can only cancel if PLACED
+  if (order.status !== "PLACED") {
+    throw new Error("Cannot cancel order at this stage");
+  }
+
+  // Update order status
+  return prisma.order.update({
+    where: { id: orderId },
+    data: { status: "CANCELLED" },
+  });
+};

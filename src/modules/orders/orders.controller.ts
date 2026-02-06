@@ -72,3 +72,31 @@ export const getOrderDetails = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+export const cancelOrder = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const orderId = Number(req.params.id);
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order id",
+      });
+    }
+
+    const cancelledOrder = await OrderService.cancelOrder(userId, orderId);
+
+    res.status(200).json({
+      success: true,
+      message: "Order cancelled successfully",
+      data: cancelledOrder,
+    });
+  } catch (error: any) {
+    res.status(403).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

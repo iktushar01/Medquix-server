@@ -187,3 +187,24 @@ export const updateOrderStatus = async (
     data: { status },
   });
 };
+
+export const getSellerOrders = async (sellerId: string) => {
+  // Find all orders that contain at least one medicine from this seller
+  const orders = await prisma.order.findMany({
+    where: {
+      orderItems: {
+        some: {
+          medicine: { sellerId },
+        },
+      },
+    },
+    include: {
+      orderItems: {
+        include: { medicine: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return orders;
+};

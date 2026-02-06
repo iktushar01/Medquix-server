@@ -148,3 +148,42 @@ export const cancelOrder = async (userId: string, orderId: number) => {
     data: { status: "CANCELLED" },
   });
 };
+
+export const updateOrderStatus = async (
+  sellerId: string,
+  orderId: number,
+  status: "PROCESSING" | "SHIPPED" | "DELIVERED"
+) => {
+  // Find order and ensure it contains seller's medicine
+  const orderItem = await prisma.orderItem.findFirst({
+    where: {
+      orderId,
+      medicine: { sellerId },
+    },
+    include: { order: true },
+  });
+
+  if (!orderItem) {
+    throw new Error("Order not found for this seller");
+  }
+
+  const order = orderItem.order;
+
+  // Prevent skipping stages
+  const validFlow: Record<string, string[]> = {
+    PLACED: ["PROCESSING"],
+    PROCESSING: ["SHIPPED"],
+    SHIPPED: ["DELIVERED"],
+    DELIVERED: [],
+    CANCELLED: [],
+  };
+
+  if (!validFlow[order.status]?.includes(status)) {
+    throw new Error(`Cannot change order from ${order.status} to ${status}`);
+  }
+
+  return prisma.order.update({
+    where: { id: orderId },
+    data: { status },
+  });
+};

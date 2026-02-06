@@ -100,3 +100,36 @@ export const cancelOrder = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+export const updateOrderStatus = async (req: Request, res: Response) => {
+  try {
+    const sellerId = req.user!.id;
+    const orderId = Number(req.params.id);
+    const { status } = req.body;
+
+    if (!["PROCESSING", "SHIPPED", "DELIVERED"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status",
+      });
+    }
+
+    const updatedOrder = await OrderService.updateOrderStatus(
+      sellerId,
+      orderId,
+      status
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Order status updated to ${status}`,
+      data: updatedOrder,
+    });
+  } catch (error: any) {
+    res.status(403).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

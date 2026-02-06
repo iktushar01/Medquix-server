@@ -6,6 +6,7 @@ import categoryRoutes from "./modules/categories/categories.router.js";
 import medicineRoutes, { sellerRouter } from "./modules/medicine/medicine.router.js";
 import cartRoutes from "./modules/carts/carts.router.js";
 import orderRoutes from "./modules/orders/orders.router.js";
+import sellerOrderRoutes from "./modules/orders/sellerOrders.router.js";
 const app: Application = express();
 
 app.use(cors({
@@ -30,4 +31,5 @@ app.use("/api/medicines", medicineRoutes);
 app.use("/api/seller/medicines", sellerRouter);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/seller/orders", sellerOrderRoutes);
 export { app }

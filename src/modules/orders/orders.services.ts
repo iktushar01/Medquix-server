@@ -62,3 +62,28 @@ export const createOrder = async (
 
   return order;
 };
+
+
+export const getMyOrders = async (userId: string) => {
+  return prisma.order.findMany({
+    where: {
+      customerId: userId,
+    },
+    include: {
+      orderItems: {
+        include: {
+          medicine: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};

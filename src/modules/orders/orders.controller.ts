@@ -27,3 +27,22 @@ export const createOrder = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+export const getMyOrders = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+
+    const orders = await OrderService.getMyOrders(userId);
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

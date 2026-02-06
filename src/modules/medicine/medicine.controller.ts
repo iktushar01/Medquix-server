@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createMedicineService, getAllMedicinesService, getMedicineByIdService, getSellerMedicinesFromDB } from "./medicine.services.js";
+import { createMedicineService, getAllMedicinesService, getMedicineByIdService, getSellerMedicinesFromDB, updateSellerMedicineInDB } from "./medicine.services.js";
 
 export const createMedicine = async (req: Request, res: Response) => {
   try {
@@ -49,6 +49,25 @@ export const getSellerMedicines = async (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     message: "Seller medicines fetched successfully",
+    data: result,
+  });
+};
+
+
+export const updateSellerMedicine = async (req: Request, res: Response) => {
+  const medicineId = Number(req.params.id);
+  const sellerId = req.user!.id;
+  const payload = req.body;
+
+  const result = await updateSellerMedicineInDB(
+    medicineId,
+    sellerId,
+    payload
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Medicine updated successfully",
     data: result,
   });
 };

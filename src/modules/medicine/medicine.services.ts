@@ -11,6 +11,18 @@ interface CreateMedicinePayload {
   sellerId: string;
 }
 
+
+interface UpdateMedicinePayload {
+  name?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  categoryId?: number;
+  manufacturer?: string;
+  expiryDate?: Date;
+  isActive?: boolean;
+}
+
 export const createMedicineService = async (payload: CreateMedicinePayload) => {
   // Check if category exists
   const category = await prisma.category.findUnique({ where: { id: payload.categoryId } });
@@ -74,3 +86,29 @@ export const getMedicineByIdService = async (id: number) => {
   return medicines;
 };
 
+export const updateSellerMedicineInDB = async (
+  medicineId: number,
+  sellerId: string,
+  payload: UpdateMedicinePayload
+) => {
+  // 1️⃣ Check ownership
+  const medicine = await prisma.medicine.findFirst({
+    where: {
+      id: medicineId,
+      sellerId,
+      isActive: true,
+    },
+  });
+
+  if (!medicine) {
+    throw new Error("Medicine not found or unauthorized");
+  }
+
+  // 2️⃣ Update medicine
+  const updatedMedicine = await prisma.medicine.update({
+    where: { id: medicineId },
+    data: payload,
+  });
+
+  return updatedMedicine;
+};

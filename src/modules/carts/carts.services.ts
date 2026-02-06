@@ -76,3 +76,26 @@ export const getCart = async (userId: string) => {
   };
 };
 
+export const removeFromCart = async (
+  userId: string,
+  medicineId: number
+) => {
+  const cartItem = await prisma.cartItem.findUnique({
+    where: {
+      customerId_medicineId: {
+        customerId: userId,
+        medicineId,
+      },
+    },
+  });
+
+  if (!cartItem) {
+    throw new Error("Item not found in cart");
+  }
+
+  await prisma.cartItem.delete({
+    where: { id: cartItem.id },
+  });
+
+  return true;
+};

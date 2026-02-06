@@ -50,3 +50,28 @@ export const getCart = async (req: Request, res: Response) => {
   }
 };
 
+export const removeFromCart = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const medicineId = Number(req.params.medicineId);
+
+    if (!medicineId) {
+      return res.status(400).json({
+        success: false,
+        message: "medicineId is required",
+      });
+    }
+
+    await CartService.removeFromCart(userId, medicineId);
+
+    res.status(200).json({
+      success: true,
+      message: "Item removed from cart",
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

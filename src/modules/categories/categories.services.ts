@@ -30,3 +30,11 @@ export const createCategoryService = async (payload: CreateCategoryPayload) => {
 
   return category;
 };
+
+
+export const getCategoriesService = async () => {
+  return prisma.category.findMany({
+    where: { isActive: true },
+    orderBy: { createdAt: "desc" },
+  });
+};

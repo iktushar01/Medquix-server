@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { createCategoryService } from "./categories.services.js";
+import { createCategoryService, getCategoriesService } from "./categories.services.js";
+import { prisma } from "../../lib/prisma.js";
 
 export const createCategory = async (req: Request, res: Response) => {
   try {
@@ -33,6 +34,22 @@ export const createCategory = async (req: Request, res: Response) => {
       });
     }
 
+    res.status(500).json({
+      success: false,
+      message: error.message || "Something went wrong"
+    });
+  }
+};
+
+
+export const getCategories = async (_req: Request, res: Response) => {
+  try {
+    const categories = await getCategoriesService();
+    res.json({
+      success: true,
+      data: categories
+    });
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       message: error.message || "Something went wrong"

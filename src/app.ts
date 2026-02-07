@@ -11,6 +11,8 @@ import sellerOrderRoutes from "./modules/orders/sellerOrders.router.js";
 import reviewRoutes from "./modules/reviews/reviews.router.js";
 import adminUserRoutes from "./modules/adminUsers/adminUsers.router.js";
 import adminOrdersRoutes from "./modules/adminUsers/adminOrders.router.js";
+import adminMedicinesRoutes from "./modules/adminUsers/adminMedicines.router.js";
+
 
 const app: Application = express();
 
@@ -52,6 +54,7 @@ app.use("/api/seller/orders", sellerOrderRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/orders", adminOrdersRoutes);
+app.use("/api/admin/medicines", adminMedicinesRoutes);
 
 
 export { app };

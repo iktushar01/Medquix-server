@@ -53,3 +53,27 @@ export const updateUserStatus = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+export const getAllOrders = async (req: Request, res: Response) => {
+  try {
+    const { status, startDate, endDate } = req.query;
+
+    const orders = await AdminUserService.getAllOrders({
+      status: status as string | undefined,
+      startDate: startDate ? new Date(startDate as string) : undefined,
+      endDate: endDate ? new Date(endDate as string) : undefined,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "All orders fetched successfully",
+      data: orders,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

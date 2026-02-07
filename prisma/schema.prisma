@@ -96,6 +96,7 @@ model Order {
   isActive        Boolean     @default(true)
 
   orderItems OrderItem[]
+  customer   User        @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@index([customerId])
   @@index([status])
@@ -179,6 +180,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   reviews       Review[]
+  orders        Order[]
 
   role   String? @default("user")
   phone  String?

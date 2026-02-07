@@ -20,6 +20,12 @@ export const getUsers = async () => {
   return users;
 };
 
+interface FilterOptions {
+  status?: string | undefined;
+  startDate?: Date | undefined;
+  endDate?: Date | undefined;
+}
+
 
 
 export const updateUserStatus = async (userId: string, newStatus: string) => {
@@ -41,4 +47,30 @@ export const updateUserStatus = async (userId: string, newStatus: string) => {
   });
 
   return updatedUser;
+};
+
+
+export const getAllOrders = async (filters: FilterOptions) => {
+  const { status, startDate, endDate } = filters;
+
+  const whereClause: any = {};
+
+  if (status) whereClause.status = status;
+  if (startDate || endDate) {
+    whereClause.createdAt = {};
+    if (startDate) whereClause.createdAt.gte = startDate;
+    if (endDate) whereClause.createdAt.lte = endDate;
+  }
+
+  const orders = await prisma.order.findMany({
+    where: whereClause,
+    include: {
+      orderItems: {
+        include: { medicine: true }, // Include medicines in order items
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return orders;
 };

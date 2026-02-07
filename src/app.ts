@@ -12,7 +12,7 @@ import reviewRoutes from "./modules/reviews/reviews.router.js";
 import adminUserRoutes from "./modules/adminUsers/adminUsers.router.js";
 import adminOrdersRoutes from "./modules/adminUsers/adminOrders.router.js";
 import adminMedicinesRoutes from "./modules/adminUsers/adminMedicines.router.js";
-
+import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 
 const app: Application = express();
 
@@ -56,5 +56,5 @@ app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/orders", adminOrdersRoutes);
 app.use("/api/admin/medicines", adminMedicinesRoutes);
 
-
+app.use(globalErrorHandler);
 export { app };

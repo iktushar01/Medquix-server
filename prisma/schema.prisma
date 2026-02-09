@@ -1,4 +1,3 @@
-
 datasource db {
   provider = "postgresql"
 }
@@ -47,7 +46,6 @@ model Category {
   @@map("categories")
 }
 
-
 // ==========================
 // Medicines
 // ==========================
@@ -55,23 +53,27 @@ model Category {
 model Medicine {
   id           Int       @id @default(autoincrement())
   name         String    @db.VarChar(255)
-  description  String?   @db.Text
+  description  String?
   price        Decimal   @db.Decimal(10, 2)
   stock        Int       @default(0)
-  sellerId     String    @db.VarChar(255) // from Beter Auth
+
+  sellerId     String    @db.VarChar(255) // external auth ID
   categoryId   Int
+
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   isActive     Boolean   @default(true)
-  manufacturer String?   @db.VarChar(255)
+
+  manufacturer String?
   expiryDate   DateTime?
 
-  category   Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  orderItems OrderItem[]
-  cartItems  CartItem[]
-  reviews    Review[]
+  images       MedicineImage[]
 
-  @@index([name])
+  category     Category   @relation(fields: [categoryId], references: [id])
+  orderItems   OrderItem[]
+  cartItems    CartItem[]
+  reviews      Review[]
+
   @@index([sellerId])
   @@index([categoryId])
   @@index([price])
@@ -80,23 +82,37 @@ model Medicine {
 }
 
 // ==========================
+// Medicine Images
+// ==========================
+
+model MedicineImage {
+  id         Int      @id @default(autoincrement())
+  imageUrl   String   @db.VarChar(500)
+  medicineId Int
+
+  medicine   Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+
+  @@index([medicineId])
+  @@map("medicine_images")
+}
+
+// ==========================
 // Orders
 // ==========================
 
 model Order {
   id              Int         @id @default(autoincrement())
-  customerId      String      @db.VarChar(255) // from Beter Auth
+  customerId      String      @db.VarChar(255) // external auth ID
   totalAmount     Decimal     @db.Decimal(10, 2)
   status          OrderStatus @default(PLACED)
   shippingAddress String      @db.VarChar(500)
-  billingAddress  String?     @db.VarChar(500)
-  paymentMethod   String?     @db.VarChar(50) // Cash on Delivery
+  billingAddress  String?
+  paymentMethod   String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   isActive        Boolean     @default(true)
 
   orderItems OrderItem[]
-  customer   User        @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@index([customerId])
   @@index([status])
@@ -131,7 +147,7 @@ model OrderItem {
 
 model CartItem {
   id         Int      @id @default(autoincrement())
-  customerId String   @db.VarChar(255) // from Beter Auth
+  customerId String   @db.VarChar(255) // external auth ID
   medicineId Int
   quantity   Int      @default(1)
   addedAt    DateTime @default(now())
@@ -151,16 +167,15 @@ model CartItem {
 
 model Review {
   id         Int      @id @default(autoincrement())
-  customerId String   @db.VarChar(255) // from Beter Auth
+  customerId String   @db.VarChar(255) // external auth ID
   medicineId Int
   rating     Int      @db.SmallInt
-  comment    String?  @db.Text
+  comment    String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   isActive   Boolean  @default(true)
 
   medicine Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@unique([customerId, medicineId])
   @@index([medicineId])
@@ -169,18 +184,21 @@ model Review {
   @@map("reviews")
 }
 
+// ==========================
+// Auth User (NO business relations)
+// ==========================
+
 model User {
-  id            String    @id
+  id            String   @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean  @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  reviews       Review[]
-  orders        Order[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions Session[]
+  accounts Account[]
 
   role   String? @default("user")
   phone  String?
@@ -189,6 +207,10 @@ model User {
   @@unique([email])
   @@map("user")
 }
+
+// ==========================
+// Auth Session
+// ==========================
 
 model Session {
   id        String   @id
@@ -199,19 +221,23 @@ model Session {
   ipAddress String?
   userAgent String?
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
   @@index([userId])
   @@map("session")
 }
 
+// ==========================
+// Auth Account
+// ==========================
+
 model Account {
-  id                    String    @id
+  id                    String   @id
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -219,12 +245,18 @@ model Account {
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("account")
 }
+
+// ==========================
+// Verification
+// ==========================
 
 model Verification {
   id         String   @id

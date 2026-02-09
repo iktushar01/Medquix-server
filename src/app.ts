@@ -56,5 +56,6 @@ app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/orders", adminOrdersRoutes);
 app.use("/api/admin/medicines", adminMedicinesRoutes);
 
+
 app.use(globalErrorHandler);
 export { app };

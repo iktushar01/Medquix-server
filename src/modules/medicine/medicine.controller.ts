@@ -3,23 +3,26 @@ import { createMedicineService, getAllMedicinesService, getMedicineByIdService, 
 
 export const createMedicine = async (req: Request, res: Response) => {
   try {
-    const sellerId = req.user!.id; // from auth middleware
+    const sellerId = req.user!.id;
     const payload = { ...req.body, sellerId };
+
+    // Ensure images is array if single string sent
+    if (payload.images && typeof payload.images === "string") {
+      payload.images = [payload.images];
+    }
 
     const medicine = await createMedicineService(payload);
 
     res.status(201).json({
       success: true,
       message: "Medicine created successfully",
-      data: medicine
+      data: medicine,
     });
   } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
+
 
 
 export const getAllMedicines = async (req: Request, res: Response) => {
@@ -55,21 +58,26 @@ export const getSellerMedicines = async (req: Request, res: Response) => {
 
 
 export const updateSellerMedicine = async (req: Request, res: Response) => {
-  const medicineId = Number(req.params.id);
-  const sellerId = req.user!.id;
-  const payload = req.body;
+  try {
+    const medicineId = Number(req.params.id);
+    const sellerId = req.user!.id;
+    const payload = req.body;
 
-  const result = await updateSellerMedicineInDB(
-    medicineId,
-    sellerId,
-    payload
-  );
+    // Ensure images is array if single string sent
+    if (payload.images && typeof payload.images === "string") {
+      payload.images = [payload.images];
+    }
 
-  res.status(200).json({
-    success: true,
-    message: "Medicine updated successfully",
-    data: result,
-  });
+    const result = await updateSellerMedicineInDB(medicineId, sellerId, payload);
+
+    res.status(200).json({
+      success: true,
+      message: "Medicine updated successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 };
 
 export const deleteSellerMedicine = async (req: Request, res: Response) => {

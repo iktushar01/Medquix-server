@@ -9,6 +9,7 @@ interface CreateMedicinePayload {
   manufacturer?: string;
   expiryDate?: Date;
   sellerId: string;
+  images?: string[];
 }
 
 
@@ -21,16 +22,21 @@ interface UpdateMedicinePayload {
   manufacturer?: string;
   expiryDate?: Date;
   isActive?: boolean;
+  images?: string[];
 }
 
 export const createMedicineService = async (payload: CreateMedicinePayload) => {
-  // Check if category exists
   const category = await prisma.category.findUnique({ where: { id: payload.categoryId } });
   if (!category) throw new Error("Category not found");
 
-  // Create medicine
+  const { images, ...medicineData } = payload;
+
   const medicine = await prisma.medicine.create({
-    data: payload
+    data: {
+      ...medicineData,
+      ...(images ? { images: { create: images.map((url) => ({ imageUrl: url })) } } : {}),
+    },
+    include: { images: true },
   });
 
   return medicine;
@@ -91,26 +97,38 @@ export const updateSellerMedicineInDB = async (
   sellerId: string,
   payload: UpdateMedicinePayload
 ) => {
-  // 1️⃣ Check ownership
   const medicine = await prisma.medicine.findFirst({
-    where: {
-      id: medicineId,
-      sellerId,
-      isActive: true,
-    },
+    where: { id: medicineId, sellerId, isActive: true },
+    include: { images: true },
   });
 
-  if (!medicine) {
-    throw new Error("Medicine not found or unauthorized");
-  }
+  if (!medicine) throw new Error("Medicine not found or unauthorized");
 
-  // 2️⃣ Update medicine
+  // Update medicine fields
+  const { images, ...medicineData } = payload;
+
+  // Update medicine fields
   const updatedMedicine = await prisma.medicine.update({
     where: { id: medicineId },
-    data: payload,
+    data: medicineData,
+    include: { images: true },
   });
 
-  return updatedMedicine;
+  // If new images are provided, replace existing
+  if (payload.images) {
+    // Delete old images
+    await prisma.medicineImage.deleteMany({ where: { medicineId } });
+
+    // Create new images
+    await prisma.medicineImage.createMany({
+      data: payload.images.map((url) => ({ medicineId, imageUrl: url })),
+    });
+  }
+
+  return prisma.medicine.findUnique({
+    where: { id: medicineId },
+    include: { images: true },
+  });
 };
 
 

@@ -1,11 +1,11 @@
 import { prisma } from "../../lib/prisma.js";
 
+// Add medicine to cart
 export const addToCart = async (
   userId: string,
   medicineId: number,
   quantity: number
 ) => {
-  // 1. Check medicine
   const medicine = await prisma.medicine.findUnique({
     where: { id: medicineId },
   });
@@ -18,7 +18,6 @@ export const addToCart = async (
     throw new Error("Insufficient stock");
   }
 
-  // 2. Check if item already in cart
   const existingItem = await prisma.cartItem.findUnique({
     where: {
       customerId_medicineId: {
@@ -31,13 +30,10 @@ export const addToCart = async (
   if (existingItem) {
     return prisma.cartItem.update({
       where: { id: existingItem.id },
-      data: {
-        quantity: existingItem.quantity + quantity,
-      },
+      data: { quantity: existingItem.quantity + quantity },
     });
   }
 
-  // 3. Add new item
   return prisma.cartItem.create({
     data: {
       customerId: userId,
@@ -47,12 +43,10 @@ export const addToCart = async (
   });
 };
 
-
+// Get cart for a user
 export const getCart = async (userId: string) => {
   const cartItems = await prisma.cartItem.findMany({
-    where: {
-      customerId: userId,
-    },
+    where: { customerId: userId },
     include: {
       medicine: {
         select: {
@@ -61,6 +55,7 @@ export const getCart = async (userId: string) => {
           price: true,
           manufacturer: true,
           stock: true,
+          images: true, // include images array
         },
       },
     },
@@ -70,16 +65,11 @@ export const getCart = async (userId: string) => {
     return sum + Number(item.medicine.price) * item.quantity;
   }, 0);
 
-  return {
-    items: cartItems,
-    total,
-  };
+  return { items: cartItems, total };
 };
 
-export const removeFromCart = async (
-  userId: string,
-  medicineId: number
-) => {
+// Remove item from cart
+export const removeFromCart = async (userId: string, medicineId: number) => {
   const cartItem = await prisma.cartItem.findUnique({
     where: {
       customerId_medicineId: {
@@ -89,13 +79,8 @@ export const removeFromCart = async (
     },
   });
 
-  if (!cartItem) {
-    throw new Error("Item not found in cart");
-  }
+  if (!cartItem) throw new Error("Item not found in cart");
 
-  await prisma.cartItem.delete({
-    where: { id: cartItem.id },
-  });
-
+  await prisma.cartItem.delete({ where: { id: cartItem.id } });
   return true;
 };

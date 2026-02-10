@@ -13,11 +13,7 @@ export const addToCart = async (req: Request, res: Response) => {
       });
     }
 
-    const cartItem = await CartService.addToCart(
-      userId,
-      medicineId,
-      quantity
-    );
+    const cartItem = await CartService.addToCart(userId, medicineId, quantity);
 
     res.status(201).json({
       success: true,
@@ -36,11 +32,23 @@ export const getCart = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
 
-    const cartItems = await CartService.getCart(userId);
+    const cart = await CartService.getCart(userId);
+
+    // Map medicines to include only first image
+    const itemsWithSingleImage = cart.items.map((item: any) => ({
+      ...item,
+      medicine: {
+        ...item.medicine,
+        image: item.medicine.images?.[0] || null,
+      },
+    }));
 
     res.status(200).json({
       success: true,
-      data: cartItems,
+      data: {
+        items: itemsWithSingleImage,
+        total: cart.total,
+      },
     });
   } catch (error: any) {
     res.status(400).json({

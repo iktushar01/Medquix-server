@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as CartService from "./carts.services.js";
 
+// Add item to cart
 export const addToCart = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
@@ -28,27 +29,15 @@ export const addToCart = async (req: Request, res: Response) => {
   }
 };
 
+// Get all cart items for user
 export const getCart = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
-
     const cart = await CartService.getCart(userId);
-
-    // Map medicines to include only first image
-    const itemsWithSingleImage = cart.items.map((item: any) => ({
-      ...item,
-      medicine: {
-        ...item.medicine,
-        image: item.medicine.images?.[0] || null,
-      },
-    }));
 
     res.status(200).json({
       success: true,
-      data: {
-        items: itemsWithSingleImage,
-        total: cart.total,
-      },
+      data: cart,
     });
   } catch (error: any) {
     res.status(400).json({
@@ -58,19 +47,49 @@ export const getCart = async (req: Request, res: Response) => {
   }
 };
 
-export const removeFromCart = async (req: Request, res: Response) => {
+// Update quantity
+export const updateQuantity = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
-    const medicineId = Number(req.params.medicineId);
+    const cartItemId = Number(req.params.cartItemId);
+    const { quantity } = req.body;
 
-    if (!medicineId) {
+    if (!cartItemId || quantity < 1) {
       return res.status(400).json({
         success: false,
-        message: "medicineId is required",
+        message: "cartItemId and valid quantity are required",
       });
     }
 
-    await CartService.removeFromCart(userId, medicineId);
+    const updatedItem = await CartService.updateQuantity(userId, cartItemId, quantity);
+
+    res.status(200).json({
+      success: true,
+      message: "Quantity updated",
+      data: updatedItem,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Remove cart item
+export const removeFromCart = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const cartItemId = Number(req.params.cartItemId);
+
+    if (!cartItemId) {
+      return res.status(400).json({
+        success: false,
+        message: "cartItemId is required",
+      });
+    }
+
+    await CartService.removeFromCart(userId, cartItemId);
 
     res.status(200).json({
       success: true,

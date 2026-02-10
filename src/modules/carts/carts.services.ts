@@ -1,30 +1,14 @@
 import { prisma } from "../../lib/prisma.js";
 
-// Add medicine to cart
-export const addToCart = async (
-  userId: string,
-  medicineId: number,
-  quantity: number
-) => {
-  const medicine = await prisma.medicine.findUnique({
-    where: { id: medicineId },
-  });
+// Add item to cart
+export const addToCart = async (userId: string, medicineId: number, quantity: number) => {
+  const medicine = await prisma.medicine.findUnique({ where: { id: medicineId } });
 
-  if (!medicine || !medicine.isActive) {
-    throw new Error("Medicine not available");
-  }
-
-  if (medicine.stock < quantity) {
-    throw new Error("Insufficient stock");
-  }
+  if (!medicine || !medicine.isActive) throw new Error("Medicine not available");
+  if (medicine.stock < quantity) throw new Error("Insufficient stock");
 
   const existingItem = await prisma.cartItem.findUnique({
-    where: {
-      customerId_medicineId: {
-        customerId: userId,
-        medicineId,
-      },
-    },
+    where: { customerId_medicineId: { customerId: userId, medicineId } },
   });
 
   if (existingItem) {
@@ -35,15 +19,11 @@ export const addToCart = async (
   }
 
   return prisma.cartItem.create({
-    data: {
-      customerId: userId,
-      medicineId,
-      quantity,
-    },
+    data: { customerId: userId, medicineId, quantity },
   });
 };
 
-// Get cart for a user
+// Get all cart items
 export const getCart = async (userId: string) => {
   const cartItems = await prisma.cartItem.findMany({
     where: { customerId: userId },
@@ -55,32 +35,35 @@ export const getCart = async (userId: string) => {
           price: true,
           manufacturer: true,
           stock: true,
-          images: true, // include images array
+          images: { select: { imageUrl: true }, orderBy: { id: "asc" } },
         },
       },
     },
   });
 
-  const total = cartItems.reduce((sum, item) => {
-    return sum + Number(item.medicine.price) * item.quantity;
-  }, 0);
+  const total = cartItems.reduce((sum, item) => sum + Number(item.medicine.price) * item.quantity, 0);
 
   return { items: cartItems, total };
 };
 
-// Remove item from cart
-export const removeFromCart = async (userId: string, medicineId: number) => {
-  const cartItem = await prisma.cartItem.findUnique({
-    where: {
-      customerId_medicineId: {
-        customerId: userId,
-        medicineId,
-      },
-    },
+// Update quantity
+export const updateQuantity = async (userId: string, cartItemId: number, quantity: number) => {
+  const cartItem = await prisma.cartItem.findUnique({ where: { id: cartItemId } });
+
+  if (!cartItem || cartItem.customerId !== userId) throw new Error("Item not found in cart");
+
+  return prisma.cartItem.update({
+    where: { id: cartItemId },
+    data: { quantity },
   });
+};
 
-  if (!cartItem) throw new Error("Item not found in cart");
+// Remove item
+export const removeFromCart = async (userId: string, cartItemId: number) => {
+  const cartItem = await prisma.cartItem.findUnique({ where: { id: cartItemId } });
 
-  await prisma.cartItem.delete({ where: { id: cartItem.id } });
+  if (!cartItem || cartItem.customerId !== userId) throw new Error("Item not found in cart");
+
+  await prisma.cartItem.delete({ where: { id: cartItemId } });
   return true;
 };

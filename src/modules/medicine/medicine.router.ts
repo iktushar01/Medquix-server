@@ -12,14 +12,13 @@ import auth, { UserRole } from "../../middlewares/auth.js";
 const router = Router();
 const sellerRouter = Router();
 
-// Seller-specific routes (mounted at /api/seller/medicines)
+// Seller routes
 sellerRouter.get("/", auth(UserRole.SELLER), getSellerMedicines);
 sellerRouter.post("/", auth(UserRole.SELLER), createMedicine);
 sellerRouter.patch("/:id", auth(UserRole.SELLER), updateSellerMedicine);
 sellerRouter.delete("/:id", auth(UserRole.SELLER), deleteSellerMedicine);
 
-
-// Public medicine routes (mounted at /api/medicines)
+// Public routes
 router.get("/", getAllMedicines);
 router.get("/:id", getMedicineById);
 

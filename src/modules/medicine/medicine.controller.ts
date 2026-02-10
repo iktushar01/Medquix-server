@@ -1,12 +1,19 @@
 import { Request, Response } from "express";
-import { createMedicineService, getAllMedicinesService, getMedicineByIdService, getSellerMedicinesFromDB, updateSellerMedicineInDB, deleteSellerMedicineFromDB } from "./medicine.services.js";
+import {
+  createMedicineService,
+  getAllMedicinesService,
+  getMedicineByIdService,
+  getSellerMedicinesFromDB,
+  updateSellerMedicineInDB,
+  deleteSellerMedicineFromDB,
+} from "./medicine.services.js";
 
 export const createMedicine = async (req: Request, res: Response) => {
   try {
     const sellerId = req.user!.id;
     const payload = { ...req.body, sellerId };
 
-    // Ensure images is array if single string sent
+    // force images array
     if (payload.images && typeof payload.images === "string") {
       payload.images = [payload.images];
     }
@@ -22,8 +29,6 @@ export const createMedicine = async (req: Request, res: Response) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
-
-
 
 export const getAllMedicines = async (req: Request, res: Response) => {
   try {
@@ -46,7 +51,6 @@ export const getMedicineById = async (req: Request, res: Response) => {
 
 export const getSellerMedicines = async (req: Request, res: Response) => {
   const sellerId = req.user!.id;
-
   const result = await getSellerMedicinesFromDB(sellerId);
 
   res.status(200).json({
@@ -56,19 +60,21 @@ export const getSellerMedicines = async (req: Request, res: Response) => {
   });
 };
 
-
 export const updateSellerMedicine = async (req: Request, res: Response) => {
   try {
     const medicineId = Number(req.params.id);
     const sellerId = req.user!.id;
     const payload = req.body;
 
-    // Ensure images is array if single string sent
     if (payload.images && typeof payload.images === "string") {
       payload.images = [payload.images];
     }
 
-    const result = await updateSellerMedicineInDB(medicineId, sellerId, payload);
+    const result = await updateSellerMedicineInDB(
+      medicineId,
+      sellerId,
+      payload
+    );
 
     res.status(200).json({
       success: true,
@@ -84,10 +90,7 @@ export const deleteSellerMedicine = async (req: Request, res: Response) => {
   const medicineId = Number(req.params.id);
   const sellerId = req.user!.id;
 
-  const result = await deleteSellerMedicineFromDB(
-    medicineId,
-    sellerId
-  );
+  const result = await deleteSellerMedicineFromDB(medicineId, sellerId);
 
   res.status(200).json({
     success: true,

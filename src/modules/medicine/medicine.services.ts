@@ -1,48 +1,34 @@
 import { prisma } from "../../lib/prisma.js";
 
-interface CreateMedicinePayload {
-  name: string;
-  description?: string;
-  price: number;
-  stock: number;
-  categoryId: number;
-  manufacturer?: string;
-  expiryDate?: Date;
-  sellerId: string;
-  images?: string[];
-}
-
-
-interface UpdateMedicinePayload {
-  name?: string;
-  description?: string;
-  price?: number;
-  stock?: number;
-  categoryId?: number;
-  manufacturer?: string;
-  expiryDate?: Date;
-  isActive?: boolean;
-  images?: string[];
-}
-
-export const createMedicineService = async (payload: CreateMedicinePayload) => {
-  const category = await prisma.category.findUnique({ where: { id: payload.categoryId } });
+/* =======================
+   CREATE
+======================= */
+export const createMedicineService = async (payload: any) => {
+  const category = await prisma.category.findUnique({
+    where: { id: payload.categoryId },
+  });
   if (!category) throw new Error("Category not found");
 
   const { images, ...medicineData } = payload;
 
-  const medicine = await prisma.medicine.create({
+  return prisma.medicine.create({
     data: {
       ...medicineData,
-      ...(images ? { images: { create: images.map((url) => ({ imageUrl: url })) } } : {}),
+      images: images
+        ? {
+            create: images.map((url: string) => ({
+              imageUrl: url,
+            })),
+          }
+        : undefined,
     },
     include: { images: true },
   });
-
-  return medicine;
 };
 
-
+/* =======================
+   GET ALL (FIXED)
+======================= */
 export const getAllMedicinesService = async (filters: any) => {
   const { category, minPrice, maxPrice, name } = filters;
 
@@ -51,77 +37,84 @@ export const getAllMedicinesService = async (filters: any) => {
   if (category) where.categoryId = Number(category);
   if (minPrice) where.price = { gte: Number(minPrice) };
   if (maxPrice) where.price = { ...where.price, lte: Number(maxPrice) };
-  if (name) where.name = { contains: name, mode: "insensitive" };
+  if (name)
+    where.name = { contains: name, mode: "insensitive" };
 
-  return await prisma.medicine.findMany({
+  return prisma.medicine.findMany({
     where,
-    include: { category: true },
+    include: {
+      category: true,
+      images: true, // ✅ FIX
+    },
     orderBy: { createdAt: "desc" },
   });
 };
 
+/* =======================
+   GET BY ID (FIXED)
+======================= */
 export const getMedicineByIdService = async (id: number) => {
   const medicine = await prisma.medicine.findUnique({
     where: { id },
-    include: { category: true, reviews: true },
+    include: {
+      category: true,
+      reviews: true,
+      images: true, // ✅ FIX
+    },
   });
+
   if (!medicine) throw new Error("Medicine not found");
   return medicine;
 };
 
-
+/* =======================
+   SELLER MEDICINES (FIXED)
+======================= */
 export const getSellerMedicinesFromDB = async (sellerId: string) => {
-  const medicines = await prisma.medicine.findMany({
+  return prisma.medicine.findMany({
     where: {
       sellerId,
       isActive: true,
     },
     include: {
       category: {
-        select: {
-          id: true,
-          name: true,
-        },
+        select: { id: true, name: true },
       },
+      images: true, // ✅ FIX
     },
-    orderBy: {
-      createdAt: "desc",
-    },
+    orderBy: { createdAt: "desc" },
   });
-
-  return medicines;
 };
 
+/* =======================
+   UPDATE
+======================= */
 export const updateSellerMedicineInDB = async (
   medicineId: number,
   sellerId: string,
-  payload: UpdateMedicinePayload
+  payload: any
 ) => {
   const medicine = await prisma.medicine.findFirst({
     where: { id: medicineId, sellerId, isActive: true },
-    include: { images: true },
   });
 
   if (!medicine) throw new Error("Medicine not found or unauthorized");
 
-  // Update medicine fields
   const { images, ...medicineData } = payload;
 
-  // Update medicine fields
-  const updatedMedicine = await prisma.medicine.update({
+  await prisma.medicine.update({
     where: { id: medicineId },
     data: medicineData,
-    include: { images: true },
   });
 
-  // If new images are provided, replace existing
-  if (payload.images) {
-    // Delete old images
+  if (images) {
     await prisma.medicineImage.deleteMany({ where: { medicineId } });
 
-    // Create new images
     await prisma.medicineImage.createMany({
-      data: payload.images.map((url) => ({ medicineId, imageUrl: url })),
+      data: images.map((url: string) => ({
+        medicineId,
+        imageUrl: url,
+      })),
     });
   }
 
@@ -131,31 +124,23 @@ export const updateSellerMedicineInDB = async (
   });
 };
 
-
+/* =======================
+   DELETE (SOFT)
+======================= */
 export const deleteSellerMedicineFromDB = async (
   medicineId: number,
   sellerId: string
 ) => {
-  // 1️⃣ Ownership check
   const medicine = await prisma.medicine.findFirst({
-    where: {
-      id: medicineId,
-      sellerId,
-      isActive: true,
-    },
+    where: { id: medicineId, sellerId, isActive: true },
   });
 
   if (!medicine) {
     throw new Error("Medicine not found or unauthorized");
   }
 
-  // 2️⃣ Soft delete
-  const deletedMedicine = await prisma.medicine.update({
+  return prisma.medicine.update({
     where: { id: medicineId },
-    data: {
-      isActive: false,
-    },
+    data: { isActive: false },
   });
-
-  return deletedMedicine;
 };

@@ -12,6 +12,10 @@ import reviewRoutes from "./modules/reviews/reviews.router.js";
 import adminUserRoutes from "./modules/adminUsers/adminUsers.router.js";
 import adminOrdersRoutes from "./modules/adminUsers/adminOrders.router.js";
 import adminMedicinesRoutes from "./modules/adminUsers/adminMedicines.router.js";
+
+// NEW: Import profile routes
+import authRoutes from "./modules/auth/auth.routes.js";
+
 import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 
 const app: Application = express();
@@ -19,27 +23,30 @@ const app: Application = express();
 /* ======================
    GLOBAL MIDDLEWARES
 ====================== */
-
-app.use(cors({
-  origin: process.env.APP_URL || "http://localhost:3000",
-  credentials: true,
-}));
+app.use(
+   cors({
+      origin: process.env.APP_URL || "http://localhost:3000",
+      credentials: true,
+   })
+);
 
 app.use(express.json());
 
 /* ======================
    AUTH (NO WILDCARD)
 ====================== */
-app.use("/api/auth", toNodeHandler(auth));
+app.use("/api/auth", toNodeHandler(auth)); // your existing auth for login/register
+app.use("/api/auth", authRoutes); // NEW: profile routes (GET /me, PATCH /me)
+app.use("/api/profile", authRoutes); // NEW: profile routes (GET /)
 
 /* ======================
    HEALTH CHECK
 ====================== */
 app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "MedQuix Server is Running",
-  });
+   res.status(200).json({
+      success: true,
+      message: "MedQuix Server is Running",
+   });
 });
 
 /* ======================
@@ -56,6 +63,9 @@ app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/orders", adminOrdersRoutes);
 app.use("/api/admin/medicines", adminMedicinesRoutes);
 
-
+/* ======================
+   GLOBAL ERROR HANDLER
+====================== */
 app.use(globalErrorHandler);
+
 export { app };

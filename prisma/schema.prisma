@@ -1,44 +1,22 @@
-datasource db {
-  provider = "postgresql"
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// ============================================
-// ENUMS
-// ============================================
-
-enum OrderStatus {
-  PLACED
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
+datasource db {
+  provider = "postgresql"
 }
 
-// ============================================
-// MODELS
-// ============================================
-
-// ==========================
-// Categories
-// ==========================
-
 model Category {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(255)
-  description String?  @db.Text
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(255)
+  description String?
   parentId    Int?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isActive    Boolean  @default(true)
-
-  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children Category[] @relation("CategoryHierarchy")
-
-  medicines Medicine[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  isActive    Boolean    @default(true)
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Category[] @relation("CategoryHierarchy")
+  medicines   Medicine[]
 
   @@unique([name, parentId])
   @@index([name])
@@ -46,33 +24,24 @@ model Category {
   @@map("categories")
 }
 
-// ==========================
-// Medicines
-// ==========================
-
 model Medicine {
-  id          Int     @id @default(autoincrement())
-  name        String  @db.VarChar(255)
-  description String?
-  price       Decimal @db.Decimal(10, 2)
-  stock       Int     @default(0)
-
-  sellerId   String @db.VarChar(255)
-  categoryId Int
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isActive  Boolean  @default(true)
-
+  id           Int             @id @default(autoincrement())
+  name         String          @db.VarChar(255)
+  description  String?
+  price        Decimal         @db.Decimal(10, 2)
+  stock        Int             @default(0)
+  sellerId     String          @db.VarChar(255)
+  categoryId   Int
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  isActive     Boolean         @default(true)
   manufacturer String?
   expiryDate   DateTime?
-
-  images     MedicineImage[]
-  orderItems OrderItem[]
-  cartItems  CartItem[]
-  reviews    Review[]
-
-  category Category @relation(fields: [categoryId], references: [id])
+  cartItems    CartItem[]
+  images       MedicineImage[]
+  category     Category        @relation(fields: [categoryId], references: [id])
+  orderItems   OrderItem[]
+  reviews      Review[]
 
   @@index([sellerId])
   @@index([categoryId])
@@ -81,24 +50,15 @@ model Medicine {
   @@map("medicines")
 }
 
-// ==========================
-// Medicine Images
-// ==========================
-
 model MedicineImage {
-  id         Int    @id @default(autoincrement())
-  imageUrl   String @db.VarChar(500)
+  id         Int      @id @default(autoincrement())
+  imageUrl   String   @db.VarChar(500)
   medicineId Int
-
-  medicine Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+  medicine   Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
 
   @@index([medicineId])
   @@map("medicine_images")
 }
-
-// ==========================
-// Orders
-// ==========================
 
 model Order {
   id              Int         @id @default(autoincrement())
@@ -111,19 +71,14 @@ model Order {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   isActive        Boolean     @default(true)
-
-  orderItems OrderItem[]
-  reviews    Review[]
+  orderItems      OrderItem[]
+  reviews         Review[]
 
   @@index([customerId])
   @@index([status])
   @@index([createdAt])
   @@map("orders")
 }
-
-// ==========================
-// Order Items
-// ==========================
 
 model OrderItem {
   id         Int      @id @default(autoincrement())
@@ -133,18 +88,13 @@ model OrderItem {
   price      Decimal  @db.Decimal(10, 2)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  medicine Medicine @relation(fields: [medicineId], references: [id], onDelete: Restrict)
+  medicine   Medicine @relation(fields: [medicineId], references: [id])
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
   @@index([medicineId])
   @@map("order_items")
 }
-
-// ==========================
-// Cart Items
-// ==========================
 
 model CartItem {
   id         Int      @id @default(autoincrement())
@@ -153,8 +103,7 @@ model CartItem {
   quantity   Int      @default(1)
   addedAt    DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  medicine Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+  medicine   Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
 
   @@unique([customerId, medicineId])
   @@index([customerId])
@@ -162,25 +111,18 @@ model CartItem {
   @@map("cart_items")
 }
 
-// ==========================
-// Reviews
-// ==========================
-
 model Review {
-  id         Int    @id @default(autoincrement())
-  customerId String @db.VarChar(255)
+  id         Int      @id @default(autoincrement())
+  customerId String   @db.VarChar(255)
   medicineId Int
+  rating     Int      @db.SmallInt
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  isActive   Boolean  @default(true)
   orderId    Int
-
-  rating  Int     @db.SmallInt
-  comment String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isActive  Boolean  @default(true)
-
-  medicine Medicine @relation(fields: [medicineId], references: [id])
-  order    Order    @relation(fields: [orderId], references: [id])
+  medicine   Medicine @relation(fields: [medicineId], references: [id])
+  order      Order    @relation(fields: [orderId], references: [id])
 
   @@unique([customerId, medicineId, orderId])
   @@index([medicineId])
@@ -188,54 +130,37 @@ model Review {
   @@map("reviews")
 }
 
-// ==========================
-// Auth User
-// ==========================
-
 model User {
-  id            String   @id
+  id            String    @id
   name          String
-  email         String
-  emailVerified Boolean  @default(false)
+  email         String    @unique
+  emailVerified Boolean   @default(false)
   image         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  phone         String?
+  role          String?   @default("user")
+  status        String?   @default("ACTIVE")
+  accounts      Account[]
+  sessions      Session[]
 
-  sessions Session[]
-  accounts Account[]
-
-  role   String? @default("user")
-  phone  String?
-  status String? @default("ACTIVE")
-
-  @@unique([email])
   @@map("user")
 }
-
-// ==========================
-// Auth Session
-// ==========================
 
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
   userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([token])
   @@index([userId])
   @@map("session")
 }
-
-// ==========================
-// Auth Account
-// ==========================
 
 model Account {
   id                    String    @id
@@ -251,16 +176,11 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("account")
 }
-
-// ==========================
-// Verification
-// ==========================
 
 model Verification {
   id         String   @id
@@ -272,4 +192,12 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+enum OrderStatus {
+  PLACED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }

@@ -5,17 +5,20 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
+// Only create pool once per serverless instance
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
 
-// Singleton pattern for Prisma Client
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined
+}
 
 export const prisma =
-  globalForPrisma.prisma ||
+  global.prisma ||
   new PrismaClient({
     adapter,
     log: ['query', 'info', 'warn', 'error'],
   })
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+if (process.env.NODE_ENV !== 'production') global.prisma = prisma

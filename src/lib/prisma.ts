@@ -5,19 +5,16 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-// Create the pool for PostgreSQL
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
-
-// Create the adapter for PostgreSQL
 const adapter = new PrismaPg(pool)
 
-// Singleton pattern for serverless/dev
+// Singleton pattern for Prisma Client
 const globalForPrisma = global as unknown as { prisma: PrismaClient }
 
 export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
-    adapter, // <-- correctly passing the adapter here
+    adapter,
     log: ['query', 'info', 'warn', 'error'],
   })
 

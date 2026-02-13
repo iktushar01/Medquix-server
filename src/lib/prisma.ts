@@ -1,10 +1,13 @@
-import "dotenv/config";
-import { PrismaPg } from '@prisma/adapter-pg'
+// lib/prisma.ts
 import { PrismaClient } from '@prisma/client'
 
-const connectionString = `${process.env.DATABASE_URL}`
+// This singleton pattern prevents too many connections in serverless/server environments
+const globalForPrisma = global as unknown as { prisma: PrismaClient }
 
-const adapter = new PrismaPg({ connectionString })
-const prisma = new PrismaClient({ adapter })
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: ['query', 'info', 'warn', 'error'],
+  })
 
-export { prisma }
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma

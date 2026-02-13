@@ -68,4 +68,4 @@ app.use("/api/admin/medicines", adminMedicinesRoutes);
 ====================== */
 app.use(globalErrorHandler);
 
-export { app };
+export default app;

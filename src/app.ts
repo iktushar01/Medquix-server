@@ -25,23 +25,30 @@ const app: Application = express();
 ====================== */
 
 const allowedOrigins = [
-  "http://localhost:3000",                   // local dev
-  "https://medquix-client.vercel.app"       // deployed frontend
-];
-
+  "http://localhost:3000",
+  process.env.APP_URL,
+].filter(Boolean) as string[];
 
 app.use(cors({
   origin: function (origin, callback) {
     // allow requests with no origin like mobile apps or Postman
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.indexOf(origin) === -1) {
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      // Check for exact match or match without trailing slash
+      const normalizedAllowed = allowedOrigin.replace(/\/$/, "");
+      const normalizedOrigin = origin.replace(/\/$/, "");
+      return normalizedAllowed === normalizedOrigin;
+    });
+
+    if (isAllowed) {
+      return callback(null, true);
+    } else {
       const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
       return callback(new Error(msg), false);
     }
-    return callback(null, true);
   },
-  credentials: true, // needed if you use cookies / auth headers
+  credentials: true,
 }));
 
 app.use(express.json());

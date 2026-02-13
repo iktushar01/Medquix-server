@@ -6,7 +6,7 @@ import nodemailer from "nodemailer";
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
-  secure: false, 
+  secure: false,
   auth: {
     user: process.env.APP_USER,
     pass: process.env.APP_PASSWORD,
@@ -18,9 +18,9 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
   trustedOrigins: [
-  "http://localhost:3000",                 // local dev
-  "https://medquix-client.vercel.app"      // deployed frontend
-],
+    "http://localhost:3000",
+    process.env.APP_URL as string
+  ].filter(Boolean),
 
   user: {
     additionalFields: {
@@ -124,11 +124,11 @@ export const auth = betterAuth({
   },
   baseURL: process.env.BETTER_AUTH_URL,
   socialProviders: {
-        google: { 
-            prompt: "select_account consent",
-            accessType: "offline",
-            clientId: process.env.GOOGLE_CLIENT_ID as string, 
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
-        }, 
+    google: {
+      prompt: "select_account consent",
+      accessType: "offline",
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
+  },
 });

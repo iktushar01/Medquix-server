@@ -1,16 +1,15 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
-import pg from 'pg'
+import { Pool } from '@neondatabase/serverless'
 import dotenv from 'dotenv'
 
 dotenv.config()
 
-// Only create pool once per serverless instance
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+// Serverless-safe Neon pool
+const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
 
 declare global {
-  // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined
 }
 

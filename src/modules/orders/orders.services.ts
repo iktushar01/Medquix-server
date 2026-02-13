@@ -1,3 +1,4 @@
+import { CartItem, Medicine } from "@prisma/client";
 import { prisma } from "../../lib/prisma.js";
 
 export const createOrder = async (
@@ -16,7 +17,7 @@ export const createOrder = async (
 
   // Calculate total amount
   const totalAmount = cartItems.reduce(
-    (sum, item) => sum + Number(item.medicine.price) * item.quantity,
+    (sum: number, item: CartItem & { medicine: Medicine }) => sum + Number(item.medicine.price) * item.quantity,
     0
   );
 

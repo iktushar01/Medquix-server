@@ -1,3 +1,4 @@
+import { Review } from "@prisma/client";
 import { prisma } from "../../lib/prisma.js";
 
 export const createReview = async (
@@ -77,7 +78,7 @@ export const getReviewsByMedicine = async (medicineId: number) => {
   });
 
   const averageRating =
-    reviews.reduce((sum, r) => sum + r.rating, 0) / (reviews.length || 1);
+    reviews.reduce((sum: number, r: Review) => sum + r.rating, 0) / (reviews.length || 1);
 
   return {
     medicineId,

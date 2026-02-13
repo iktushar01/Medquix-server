@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.js",
-    "build": "tsc && prisma generate"
-  },
+  "dev": "tsx watch src/server.ts",
+  "build": "prisma generate && tsc"
+},
   "devDependencies": {
     "@prisma/client": "^7.4.0",
     "@types/bcrypt": "^6.0.0",

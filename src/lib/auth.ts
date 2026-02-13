@@ -17,7 +17,11 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  trustedOrigins: [process.env.APP_URL!],
+  trustedOrigins: [
+  "http://localhost:3000",                 // local dev
+  "https://medquix-client.vercel.app"      // deployed frontend
+],
+
   user: {
     additionalFields: {
       role: {

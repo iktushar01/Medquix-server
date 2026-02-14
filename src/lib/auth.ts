@@ -19,6 +19,7 @@ export const auth = betterAuth({
   }),
   trustedOrigins: [
     "http://localhost:3000",
+    "https://medquix-client.vercel.app",
     process.env.APP_URL as string
   ].filter(Boolean),
 

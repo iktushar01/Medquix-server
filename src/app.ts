@@ -25,30 +25,31 @@ const app: Application = express();
 ====================== */
 
 const allowedOrigins = [
-  "http://localhost:3000",
-  process.env.APP_URL,
+   "http://localhost:3000",
+   "https://medquix-client.vercel.app",
+   process.env.APP_URL,
 ].filter(Boolean) as string[];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // allow requests with no origin like mobile apps or Postman
-    if (!origin) return callback(null, true);
+   origin: function (origin, callback) {
+      // allow requests with no origin like mobile apps or Postman
+      if (!origin) return callback(null, true);
 
-    const isAllowed = allowedOrigins.some(allowedOrigin => {
-      // Check for exact match or match without trailing slash
-      const normalizedAllowed = allowedOrigin.replace(/\/$/, "");
-      const normalizedOrigin = origin.replace(/\/$/, "");
-      return normalizedAllowed === normalizedOrigin;
-    });
+      const isAllowed = allowedOrigins.some(allowedOrigin => {
+         // Check for exact match or match without trailing slash
+         const normalizedAllowed = allowedOrigin.replace(/\/$/, "");
+         const normalizedOrigin = origin.replace(/\/$/, "");
+         return normalizedAllowed === normalizedOrigin;
+      });
 
-    if (isAllowed) {
-      return callback(null, true);
-    } else {
-      const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-      return callback(new Error(msg), false);
-    }
-  },
-  credentials: true,
+      if (isAllowed) {
+         return callback(null, true);
+      } else {
+         const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+         return callback(new Error(msg), false);
+      }
+   },
+   credentials: true,
 }));
 
 app.use(express.json());
